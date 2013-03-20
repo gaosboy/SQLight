@@ -15,9 +15,8 @@
 	SqlightDriver *sqlightDrv;
 }
 
-- (id)initWithDatabase:(NSString *)database;
-
-- (id)initWithDatabase:(NSString *)database AndTable:(NSString *)table;
++ (id)database:(NSString *)database;
++ (id)database:(NSString *)database AndTable:(NSString *)table;
 
 - (SqlightResult*) selectFields:(NSArray *)fields ByCondition:(NSString *)sql Bind:(NSArray *)bind;
 

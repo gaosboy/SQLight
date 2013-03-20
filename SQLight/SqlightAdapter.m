@@ -8,6 +8,13 @@
 
 #import "SqlightAdapter.h"
 
+@interface SqlightAdapter ()
+
+- (id)initWithDatabase:(NSString *)database;
+- (id)initWithDatabase:(NSString *)database AndTable:(NSString *)table;
+
+@end
+
 @implementation SqlightAdapter
 
 @synthesize databaseName;
@@ -128,6 +135,47 @@
 	NSString *sql = [NSString stringWithFormat:@"DROP TABLE %@ ", table];
 
     return [self excuteSQL:sql bind:nil];
+}
+
++ (id)database:(NSString *)database
+{
+    static dispatch_once_t once_token;
+    static NSMutableDictionary *handlePool;
+    dispatch_once(&once_token, ^{
+        handlePool = [[NSMutableDictionary alloc] init];
+    });
+    
+    if ([[handlePool allKeys] containsObject:database] && [handlePool objectForKey:database]) {
+    }
+    else {
+        SqlightAdapter *obj = [[SqlightAdapter alloc] initWithDatabase:database];
+        [handlePool setValue:obj forKey:database];
+    }
+    return [handlePool objectForKey:database];
+}
+
++ (id)database:(NSString *)database AndTable:(NSString *)table
+{
+    static dispatch_once_t once_token;
+    static NSMutableDictionary *handlePool;
+    dispatch_once(&once_token, ^{
+        handlePool = [[NSMutableDictionary alloc] init];
+    });
+    
+    NSString *token = [database stringByAppendingPathExtension:table];
+    if (! [[handlePool allKeys] containsObject:token] || nil == [handlePool objectForKey:token]) {
+        SqlightAdapter *obj = [[SqlightAdapter alloc] initWithDatabase:database];
+        [obj setTableName:table];
+        SqlightResult* res = [obj selectFields:[NSMutableArray arrayWithObjects:@"1", nil]
+                                                               ByCondition:@"" Bind:nil];
+        if (SQLITE_DONE == res.code) {
+            [handlePool setValue:obj forKey:token];
+        }
+        else {
+            return nil;
+        }
+    }
+    return [handlePool objectForKey:token];
 }
 
 @end

@@ -19,26 +19,24 @@
     self.window.backgroundColor = [UIColor whiteColor];
     [self.window makeKeyAndVisible];
     
-    static SqlightAdapter *sqlight = nil;
+    NSString *dbName = @"DemoDb";
+    NSString *tbName = @"DemoTb";
+    SqlightAdapter *sqlight = [SqlightAdapter database:dbName AndTable:tbName];
     if (nil == sqlight) {
-        NSString *tbName = @"DemoTb";
-        sqlight = [[SqlightAdapter alloc] initWithDatabase:@"DemoDb" AndTable:tbName];
-        if (nil == sqlight) {
-            sqlight = [[SqlightAdapter alloc] initWithDatabase:@"DemoDb"];
-            
-            [sqlight createTable:tbName Info:[NSMutableArray arrayWithObjects:
-                                              @"id INTEGER PRIMARY KEY ASC",
-                                              @"type INTEGER",
-                                              @"style INTEGER",
-                                              @"content",
-                                              @"created INTEGER",
-                                              nil]];
-            
-            sqlight.tableName = tbName;
-        }
+        sqlight = [SqlightAdapter database:dbName];
+        [sqlight createTable:tbName Info:[NSMutableArray arrayWithObjects:
+                                          @"id INTEGER PRIMARY KEY ASC",
+                                          @"type INTEGER",
+                                          @"style INTEGER",
+                                          @"content",
+                                          @"created INTEGER",
+                                          nil]];
+        
+        sqlight.tableName = tbName;
     }
     
-    SqlightResult *result = [sqlight insertData:[NSDictionary dictionaryWithObjectsAndKeys:
+    SqlightAdapter *sqlightB = [SqlightAdapter database:dbName AndTable:tbName];
+    SqlightResult *result = [sqlightB insertData:[NSDictionary dictionaryWithObjectsAndKeys:
                                                  @"1",                  @"type",
                                                  @"2",                  @"style",
                                                  @"This is a Demo.",    @"content",
@@ -46,13 +44,15 @@
     
     NSLog(@"Insert Result msg:%@ code:%d data:%@", result.msg, result.code, result.data);
     
-    SqlightResult *queryResult = [sqlight selectFields:[NSArray arrayWithObjects:@"id", @"type", @"style", @"content", nil]
+    SqlightAdapter *sqlightC = [SqlightAdapter database:dbName AndTable:tbName];
+    SqlightResult *queryResult = [sqlightC selectFields:[NSArray arrayWithObjects:@"id", @"type", @"style", @"content", nil]
                                            ByCondition:@""
                                                   Bind:nil];
     
     NSLog(@"Query Result msg:%@ code:%d data:%@", queryResult.msg, queryResult.code, queryResult.data);
     
-    SqlightResult *updateResult = [sqlight updateData:[NSDictionary dictionaryWithObjectsAndKeys:
+    SqlightAdapter *sqlightD = [SqlightAdapter database:dbName AndTable:tbName];
+    SqlightResult *updateResult = [sqlightD updateData:[NSDictionary dictionaryWithObjectsAndKeys:
                                                        @"1",                  @"type",
                                                        @"20",                 @"style",
                                                        @"This is a Demo.",    @"content",
@@ -62,11 +62,14 @@
     
     NSLog(@"Update Result msg:%@ code:%d data:%@", updateResult.msg, updateResult.code, updateResult.data);
     
-    queryResult = [sqlight selectFields:[NSArray arrayWithObjects:@"id", @"type", @"style", @"content", nil]
+    SqlightAdapter *sqlightE = [SqlightAdapter database:dbName AndTable:tbName];
+    queryResult = [sqlightE selectFields:[NSArray arrayWithObjects:@"id", @"type", @"style", @"content", nil]
                                            ByCondition:@""
                                                   Bind:nil];
     
     NSLog(@"Query Result msg:%@ code:%d data:%@", queryResult.msg, queryResult.code, queryResult.data);
+    
+    NSLog(@"%p %p %p %p %p", sqlight, sqlightB, sqlightC, sqlightD, sqlightE);
     
     return YES;
 }
