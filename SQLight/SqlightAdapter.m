@@ -13,18 +13,24 @@
 - (id)initWithDatabase:(NSString *)database;
 - (id)initWithDatabase:(NSString *)database AndTable:(NSString *)table;
 
+@property (nonatomic, strong)   NSString        *databaseName;
+@property (strong, nonatomic)   SqlightDriver   *sqlightDrv;
+
 @end
 
 @implementation SqlightAdapter
 
-@synthesize databaseName;
-@synthesize tableName;
+@synthesize databaseName        = _databaseName;
+@synthesize tableName           = _tableName;
+@synthesize sqlightDrv          = _sqlightDrv;
+
+#pragma mark - Private
 
 - (id)initWithDatabase:(NSString *)database {
     self = [super init];
 	if (self) {
-		[self setDatabaseName:database];
-		sqlightDrv = [[SqlightDriver alloc] initWithDatabase:databaseName];
+        self.databaseName = database;
+		self.sqlightDrv = [[SqlightDriver alloc] initWithDatabase:database];
 	}
 	return self;
 }
@@ -32,7 +38,7 @@
 - (id)initWithDatabase:(NSString *)database AndTable:(NSString *)table {
 	self = [[SqlightAdapter alloc] initWithDatabase:database];
 	if (self) {
-		[self setTableName:table];
+        self.tableName = table;
 		SqlightResult* res = [self selectFields:[NSMutableArray arrayWithObjects:@"1", nil] ByCondition:@"" Bind:nil];
 		if (SQLITE_ERROR == res.code) {
 			return nil;
@@ -42,12 +48,14 @@
 	return nil;
 }
 
+#pragma mark - Public
+
 - (SqlightResult *)excuteSQL:(NSString *)aSQL bind:(NSArray *)aBind {
     if (nil == aBind || 0 >= [aBind count]) {
-        return [sqlightDrv querySql:aSQL];
+        return [self.sqlightDrv querySql:aSQL];
     }
     else {
-        return [sqlightDrv querySql:aSQL Bind:aBind];
+        return [self.sqlightDrv querySql:aSQL Bind:aBind];
     }
 }
 
@@ -58,7 +66,7 @@
 		fieldsString = [fieldsString stringByAppendingString:@","];
 	}
 	fieldsString = [fieldsString substringToIndex:[fieldsString length] - 1];
-	NSString *sql = [NSString stringWithFormat:@"SELECT %@ FROM %@", fieldsString, tableName];
+	NSString *sql = [NSString stringWithFormat:@"SELECT %@ FROM %@", fieldsString, self.tableName];
 	if (condition && 0 < [condition length]) {
 		sql = [sql stringByAppendingFormat:@" WHERE %@", condition];
 	}
@@ -83,7 +91,7 @@
 	fields = [fields substringToIndex:[fields length] - 1];
 	values = [values substringToIndex:[values length] - 1];
 	
- 	NSString *sql = [NSString stringWithFormat:@"INSERT INTO %@ (%@) VALUES (%@)", tableName, fields, values];
+ 	NSString *sql = [NSString stringWithFormat:@"INSERT INTO %@ (%@) VALUES (%@)", self.tableName, fields, values];
 
     return [self excuteSQL:sql bind:bind];
 }
@@ -101,17 +109,17 @@
 	fields = [fields substringToIndex:[fields length] - 1];
     [newBind addObjectsFromArray:bind];
 	
- 	NSString *sql = [NSString stringWithFormat:@"UPDATE %@ SET %@", tableName, fields];
+ 	NSString *sql = [NSString stringWithFormat:@"UPDATE %@ SET %@", self.tableName, fields];
     if (condition && 0 < [condition length]) {
 		sql = [sql stringByAppendingFormat:@" WHERE %@", condition];
 	}
 
-	return [sqlightDrv querySql:sql Bind:newBind];
+	return [self.sqlightDrv querySql:sql Bind:newBind];
 }
 
 - (SqlightResult*)deleteByCondition:(NSString *)condition Bind:(NSMutableArray *)bind {
     
- 	NSString *sql = [NSString stringWithFormat:@"DELETE FROM %@", tableName];
+ 	NSString *sql = [NSString stringWithFormat:@"DELETE FROM %@", self.tableName];
 
     if (condition && 0 < [condition length]) {
 		sql = [sql stringByAppendingFormat:@" WHERE %@", condition];
@@ -128,7 +136,7 @@
 	}
 	fields = [fields substringToIndex:[fields length] - 1];
 	NSString *sql = [NSString stringWithFormat:@"CREATE TABLE IF NOT EXISTS %@ (%@)", table, fields];
-	return [sqlightDrv querySql:sql];
+	return [self.sqlightDrv querySql:sql];
 }
 
 - (SqlightResult*)dropTable:(NSString *)table {
@@ -136,6 +144,8 @@
 
     return [self excuteSQL:sql bind:nil];
 }
+
+#pragma mark - Static
 
 + (id)database:(NSString *)database
 {

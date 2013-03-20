@@ -6,12 +6,8 @@
 //  Copyright 2010 __MyCompanyName__. All rights reserved.
 //
 
-@interface SqlightResult : NSObject {
-@private
-    NSInteger code;
-    NSString *msg;
-    NSMutableArray *data;
-}
+@interface SqlightResult : NSObject
+
 @property (nonatomic, assign)NSInteger code;
 @property (nonatomic, strong)NSString* msg;
 @property (nonatomic, strong)NSMutableArray* data;

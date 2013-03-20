@@ -8,17 +8,21 @@
 
 #import "SqlightResult.h"
 
+@interface SqlightResult ()
+
+@end
+
 @implementation SqlightResult
 
-@synthesize code;
-@synthesize msg;
-@synthesize data;
+@synthesize code        = _code;
+@synthesize msg         = _msg;
+@synthesize data        = _data;
 
 - (id)init
 {
     self = [super init];
     if (self) {
-        data=[[NSMutableArray alloc] init];
+        self.data=[[NSMutableArray alloc] init];
     }
     
     return self;

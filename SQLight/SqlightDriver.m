@@ -8,7 +8,17 @@
 
 #import "SqlightDriver.h"
 
+@interface SqlightDriver ()
+
+@property (strong, nonatomic)   NSString    *databasePath; // path of the database file
+@property (assign, nonatomic)   sqlite3     *dbHandler; // database handler
+
+@end
+
 @implementation SqlightDriver
+
+@synthesize databasePath        = _databasePath;
+@synthesize dbHandler           = _dbHandler;
 
 - (id)initWithDatabase:(NSString *)database {
 	if (self = [super init]) {
@@ -19,10 +29,10 @@
             [[NSFileManager defaultManager] createDirectoryAtPath:documentsDir withIntermediateDirectories:YES attributes:nil error:nil];
         }
         
-        databasePath = [documentsDir stringByAppendingPathComponent:database];
+        self.databasePath = [documentsDir stringByAppendingPathComponent:database];
         
 		[self checkAndCreateDatabase:database];
-		if(SQLITE_OK == sqlite3_open([databasePath UTF8String], &dbHandler)) {
+		if(SQLITE_OK == sqlite3_open([self.databasePath UTF8String], &_dbHandler)) {
 			return self;
 		}
 		else {
@@ -34,9 +44,9 @@
 
 - (void)checkAndCreateDatabase:(NSString *)database {
 	NSFileManager *fileManager = [NSFileManager defaultManager];
-	if(! [fileManager fileExistsAtPath:databasePath]) {
+	if(! [fileManager fileExistsAtPath:self.databasePath]) {
 		NSString *databasePathFromApp = [[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:database];
-		[fileManager copyItemAtPath:databasePathFromApp toPath:databasePath error:nil];
+		[fileManager copyItemAtPath:databasePathFromApp toPath:self.databasePath error:nil];
 	}
 }
 
@@ -46,9 +56,9 @@
 	sqlite3_stmt *compiledStatement;
 
 	const char *sqlStatement = [[NSString stringWithString:sql] UTF8String];
-	res.code = sqlite3_prepare_v2(dbHandler, sqlStatement, -1, &compiledStatement, NULL);
+	res.code = sqlite3_prepare_v2(self.dbHandler, sqlStatement, -1, &compiledStatement, NULL);
 	if(SQLITE_OK != res.code) {
-		res.msg = [NSString stringWithUTF8String:sqlite3_errmsg(dbHandler)];
+		res.msg = [NSString stringWithUTF8String:sqlite3_errmsg(self.dbHandler)];
 		return res;
 	}
 
@@ -87,9 +97,9 @@
 	sqlite3_stmt *compiledStatement;
 	const char *sqlStatement = [[NSString stringWithString:sql] UTF8String];
 
-	res.code = sqlite3_prepare_v2(dbHandler, sqlStatement, -1, &compiledStatement, NULL);
+	res.code = sqlite3_prepare_v2(self.dbHandler, sqlStatement, -1, &compiledStatement, NULL);
 	if(SQLITE_OK != res.code) {
-		res.msg = [NSString stringWithUTF8String:sqlite3_errmsg(dbHandler)];
+		res.msg = [NSString stringWithUTF8String:sqlite3_errmsg(self.dbHandler)];
 		return res;
 	}	
 
