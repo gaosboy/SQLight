@@ -124,4 +124,11 @@
 	return res;
 }
 
+- (void)dealloc
+{
+    if (self.dbHandler) {
+        sqlite3_close(self.dbHandler);
+    }
+}
+
 @end
