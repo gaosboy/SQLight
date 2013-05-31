@@ -10,9 +10,6 @@
 
 @interface SqlightAdapter ()
 
-- (id)initWithDatabase:(NSString *)database;
-- (id)initWithDatabase:(NSString *)database AndTable:(NSString *)table;
-
 @property (nonatomic, strong)   NSString        *databaseName;
 @property (strong, nonatomic)   SqlightDriver   *sqlightDrv;
 
@@ -23,30 +20,6 @@
 @synthesize databaseName        = _databaseName;
 @synthesize tableName           = _tableName;
 @synthesize sqlightDrv          = _sqlightDrv;
-
-#pragma mark - Private
-
-- (id)initWithDatabase:(NSString *)database {
-    self = [super init];
-	if (self) {
-        self.databaseName = database;
-		self.sqlightDrv = [[SqlightDriver alloc] initWithDatabase:database];
-	}
-	return self;
-}
-
-- (id)initWithDatabase:(NSString *)database AndTable:(NSString *)table {
-	self = [[SqlightAdapter alloc] initWithDatabase:database];
-	if (self) {
-        self.tableName = table;
-		SqlightResult* res = [self selectFields:[NSMutableArray arrayWithObjects:@"1", nil] ByCondition:@"" Bind:nil];
-		if (SQLITE_ERROR == res.code) {
-			return nil;
-		}
-		return self;
-	}
-	return nil;
-}
 
 #pragma mark - Public
 
@@ -143,6 +116,27 @@
 	NSString *sql = [NSString stringWithFormat:@"DROP TABLE %@ ", table];
 
     return [self excuteSQL:sql bind:nil];
+}
+
+- (id)initWithDatabase:(NSString *)database {
+    self = [super init];
+	if (self) {
+        self.databaseName = database;
+		self.sqlightDrv = [[SqlightDriver alloc] initWithDatabase:database];
+	}
+	return self;
+}
+
+- (id)initWithDatabase:(NSString *)database AndTable:(NSString *)table {
+	self = [[SqlightAdapter alloc] initWithDatabase:database];
+	if (self) {
+        self.tableName = table;
+		SqlightResult* res = [self selectFields:[NSMutableArray arrayWithObjects:@"1", nil] ByCondition:@"" Bind:nil];
+        if (SQLITE_DONE != res.code) {
+			return nil;
+		}
+	}
+	return self;
 }
 
 #pragma mark - Static

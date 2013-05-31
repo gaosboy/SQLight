@@ -12,6 +12,9 @@
 + (id)database:(NSString *)database;
 + (id)database:(NSString *)database AndTable:(NSString *)table;
 
+- (id)initWithDatabase:(NSString *)database;
+- (id)initWithDatabase:(NSString *)database AndTable:(NSString *)table;
+
 // DML
 - (SqlightResult*) selectFields:(NSArray *)fields ByCondition:(NSString *)sql Bind:(NSArray *)bind;
 - (SqlightResult*) insertData:(NSDictionary *)data;
